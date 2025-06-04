@@ -2,7 +2,7 @@ import {Router} from 'express';
 import { pool } from '../../config/db.config.js';
 const router = Router();
 
-router.get('/users', async(req, res) => {
+router.get('/users', async(res) => {
 
     try {
         await pool.query('BEGIN');
@@ -68,10 +68,24 @@ router.delete('/users/:userId', async(req, res) => {
     } 
 });
 
-router.put('/users/:userId', (req, res) => {
-    const {userId} = req.params;
-    res.send('actualizando usuario con id: ' + userId);
+router.put('/users/:userId', async(req, res) => {
+        try {
+            const {userId} = req.params; 
+            const data = req.body; 
+            await pool.query('BEGIN');
+            const result = await pool.query(
+                'UPDATE users SET name = $1, email = $2 WHERE id = $3 RETURNING *',
+                [data.name, data.email, userId]
+            );
+            await pool.query('COMMIT');
+            res.status(200).json(result.rows);
+        } 
+        catch (e) 
+        {
+            await pool.query('ROLLBACK');
+            console.error('Transacción fallida:', e);
+            res.status(500).json({ message: 'Error en la transacción.' });
+    } 
 });
-
 
 export default router;
