@@ -1,11 +1,12 @@
 import pg from 'pg';
+import {dbConfig} from './config.js';
 
 export const pool = new pg.Pool({
-    user: process.env.DB_USER || 'admin',
-    host: process.env.DB_HOST || 'localhost',
-    database: process.env.DB_NAME || 'postgres',
-    password: process.env.DB_PASSWORD || 'ac040487',    
-    port: process.env.DB_PORT || 5432,
+    user: dbConfig.user,
+    host: dbConfig.host,
+    database: dbConfig.database,
+    password: dbConfig.password,    
+    port: dbConfig.port,
 });
 
 pool.on('connect', () => {
